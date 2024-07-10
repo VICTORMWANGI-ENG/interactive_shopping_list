@@ -39,5 +39,12 @@ function displayItems() {
 function createAlistItem(item) {
   const li = createElement('li')
   addText(li, item)
-  appendChild(li,ol)
+  appendChild(li, ol)
+}
+const form = select('form')
+listen(form, 'submit', addItem)
+
+function addItem(event) {
+  event.preventDefault()
+  console.dir(event.target);
 }
