@@ -1,8 +1,7 @@
 
+// Utility Functions for DOM Manipulation.
 
-//Utility function
-
-function createElement(element) {
+function createAnElement(element) {
 	return document.createElement(element);
 }
 
@@ -26,25 +25,72 @@ function addAttribute(element, attribute, content) {
 	return element.setAttribute(attribute, content);
 }
 
-const shoppingList = ['milk', 'bread']
+const shoppingList = [];
 
-const ol = select('ol')
+const ol = select("ol");
 
-listen(document,'DOMContentLoaded', displayItems)
+listen(document, "DOMContentLoaded", displayItems);
 
 function displayItems() {
-  shoppingList.forEach(createAlistItem)
-} 
-
-function createAlistItem(item) {
-  const li = createElement('li')
-  addText(li, item)
-  appendChild(li, ol)
+	ol.innerHTML= "";
+	shoppingList.map(createAListItem);
 }
-const form = select('form')
-listen(form, 'submit', addItem)
+
+function createAListItem(item, index) {
+	const li = createAnElement("li");
+	addText(li, item);
+	appendChild(li, ol);
+
+	listen(li, "click", toggleChecked);
+
+	function toggleChecked() {
+		li.classList.toggle("checked");
+	}
+
+	// Trigger editing when a user double clicks on each menu item.
+	listen(li, "dblclick", editItem);
+	function editItem() {
+		addAttribute(li, "contenteditable", true);
+		li.focus();
+	}
+
+	// Listen when the item is not in focus and stop editing.
+	// This could happen when the cursor is clicked outside the list item or when(as will be done with the implementation of the keydown listener, when a user hits "Enter")
+	listen(li, "blur", stopEditingTheItem);
+
+	function stopEditingTheItem() {
+		li.removeAttribute("contenteditable");
+		li.blur();
+	}
+
+	// Listen when a key is pressed. We want the content to stop being editable when a user hits "Enter"
+	listen(li, "keydown", stopEditingWhenEnterIsPressed);
+
+	function stopEditingWhenEnterIsPressed(event) {
+		if (event.key === "Enter") {
+			event.target.blur();
+			shoppingList[index] = event.target.innerText;
+		}
+	}
+}
+
+const form = select("form");
+listen(form, "submit", addItem);
 
 function addItem(event) {
-  event.preventDefault()
-  console.dir(event.target);
+	event.preventDefault();
+
+	shoppingList.push(event.target[0].value);
+
+	displayItems();
+
+	event.target.reset();
+}
+
+const deleteButton = select(".delete");
+listen(deleteButton, "click", clearList);
+
+function clearList() {
+	shoppingList.length = 0;
+	displayItems();
 }
